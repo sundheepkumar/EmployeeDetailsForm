@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Location Preferences</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .section-box {
+            background-color: #f0f8ff;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+        .form-label {
+            font-weight: 600;
+        }
+        select:disabled {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body onload="populateSelects()">
+
+<div class="container mt-4">
+    <h3 class="mb-4">Employee Location Preference Form</h3>
+    <div class="mb-3 row">
+        <div class="col-md-4">
+            <label class="form-label">Employee ID</label>
+            <input type="number" id="emp_id" class="form-control" onchange="fetchDetails()">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Name</label>
+            <input type="text" id="name" class="form-control" readonly>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Department</label>
+            <input type="text" id="department" class="form-control" readonly>
+        </div>
+    </div>
+
+    <!-- Section for Domestic Locations -->
+    <div class="section-box" id="domesticLocationSection">
+        <h5>Section 1 - Domestic Places</h5>
+        <p>Select one option for each place. Each option can only be selected once.</p>
+        <div class="table-responsive">
+            <table class="table table-borderless">
+                <thead>
+                <tr>
+                    <th>Places</th>
+                    <th>Option 1</th>
+                    <th>Option 2</th>
+                    <th>Option 3</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Place 1</td>
+                    <td><select id="loc1_1" class="form-select" onchange="handleRowSelect(1); enforceUnique(1, 'loc')"></select></td>
+                    <td><select id="loc1_2" class="form-select" onchange="handleRowSelect(1); enforceUnique(2, 'loc')"></select></td>
+                    <td><select id="loc1_3" class="form-select" onchange="handleRowSelect(1); enforceUnique(3, 'loc')"></select></td>
+                </tr>
+                <tr>
+                    <td>Place 2</td>
+                    <td><select id="loc2_1" class="form-select" onchange="handleRowSelect(2); enforceUnique(1, 'loc')"></select></td>
+                    <td><select id="loc2_2" class="form-select" onchange="handleRowSelect(2); enforceUnique(2, 'loc')"></select></td>
+                    <td><select id="loc2_3" class="form-select" onchange="handleRowSelect(2); enforceUnique(3, 'loc')"></select></td>
+                </tr>
+                <tr>
+                    <td>Place 3</td>
+                    <td><select id="loc3_1" class="form-select" onchange="handleRowSelect(3); enforceUnique(1, 'loc')"></select></td>
+                    <td><select id="loc3_2" class="form-select" onchange="handleRowSelect(3); enforceUnique(2, 'loc')"></select></td>
+                    <td><select id="loc3_3" class="form-select" onchange="handleRowSelect(3); enforceUnique(3, 'loc')"></select></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section for International Locations -->
+    <div class="section-box" id="internationalLocationSection">
+        <h5>Section 2 - Foreign Places</h5>
+        <p>Select one option for each place. Each option can only be selected once.</p>
+        <div class="table-responsive">
+            <table class="table table-borderless">
+                <thead>
+                <tr>
+                    <th>Places</th>
+                    <th>Option 1</th>
+                    <th>Option 2</th>
+                    <th>Option 3</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Place 1</td>
+                    <td><select id="int1_1" class="form-select" onchange="handleRowSelect(1, 'int'); enforceUnique(1, 'int')"></select></td>
+                    <td><select id="int1_2" class="form-select" onchange="handleRowSelect(1, 'int'); enforceUnique(2, 'int')"></select></td>
+                    <td><select id="int1_3" class="form-select" onchange="handleRowSelect(1, 'int'); enforceUnique(3, 'int')"></select></td>
+                </tr>
+                <tr>
+                    <td>Place 2</td>
+                    <td><select id="int2_1" class="form-select" onchange="handleRowSelect(2, 'int'); enforceUnique(1, 'int')"></select></td>
+                    <td><select id="int2_2" class="form-select" onchange="handleRowSelect(2, 'int'); enforceUnique(2, 'int')"></select></td>
+                    <td><select id="int2_3" class="form-select" onchange="handleRowSelect(2, 'int'); enforceUnique(3, 'int')"></select></td>
+                </tr>
+                <tr>
+                    <td>Place 3</td>
+                    <td><select id="int3_1" class="form-select" onchange="handleRowSelect(3, 'int'); enforceUnique(1, 'int')"></select></td>
+                    <td><select id="int3_2" class="form-select" onchange="handleRowSelect(3, 'int'); enforceUnique(2, 'int')"></select></td>
+                    <td><select id="int3_3" class="form-select" onchange="handleRowSelect(3, 'int'); enforceUnique(3, 'int')"></select></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button class="btn btn-success" onclick="submitForm()">Submit Preferences</button>
+</div>
+
+<script>
+    // Function to handle row uniqueness: only one option can be selected per row
+    function handleRowSelect(row, prefix = 'loc') {
+        const rowSelects = [`${prefix}${row}_1`, `${prefix}${row}_2`, `${prefix}${row}_3`];
+        let selected = null;
+
+        // Find which option is selected in the row
+        rowSelects.forEach(id => {
+            const el = document.getElementById(id);
+            if (el.value !== "") selected = id;
+        });
+
+        // Disable the other options in the row if one is selected
+        rowSelects.forEach(id => {
+            const el = document.getElementById(id);
+            el.disabled = selected && id !== selected; // Disable the unselected options
+        });
+
+        // Call column uniqueness to ensure each option is unique across columns
+        enforceColumnUniqueness(prefix);
+    }
+
+    // Function to enforce column uniqueness: each option can only appear once per column
+    function enforceUnique(col, type) {
+        const selected = [];
+
+        // Collect selected values in the column
+        for (let i = 1; i <= 3; i++) {
+            const sel = document.getElementById(`${type}${i}_${col}`);
+            if (sel && sel.value) selected.push(sel.value);
+        }
+
+        // Disable the options in the column that are already selected
+        for (let i = 1; i <= 3; i++) {
+            const sel = document.getElementById(`${type}${i}_${col}`);
+            if (!sel) continue;
+
+            const currentVal = sel.value;
+            const options = sel.querySelectorAll('option');
+            options.forEach(option => {
+                option.disabled = selected.includes(option.value) && option.value !== currentVal;
+            });
+        }
+    }
+
+    // Function to ensure column uniqueness by checking all 3 rows
+    function enforceColumnUniqueness(type) {
+        for (let colIndex = 1; colIndex <= 3; colIndex++) { // Column 1 to 3
+            const selectedValuesInColumn = [];
+            for (let rowIndex = 1; rowIndex <= 3; rowIndex++) { // Row 1 to 3
+                const select = document.getElementById(`${type}${rowIndex}_${colIndex}`);
+                const value = select.value;
+                if (value && selectedValuesInColumn.includes(value)) {
+                    // Reset if value is already selected in the column
+                    select.value = "";
+                    alert(`Option '${value}' has already been selected in this column. Please choose a different one.`);
+                } else if (value) {
+                    selectedValuesInColumn.push(value);
+                }
+            }
+        }
+    }
+
+    // Populate selects from data
+    async function populateSelects() {
+        try {
+            const res = await fetch('/get_locations');
+            const text = await res.text();  // Read the response as plain text
+            console.log(text);  // Log the raw response text
+
+            const data = JSON.parse(text);  // Manually parse JSON from the text
+            if (data.error) {
+                alert("Error loading locations: " + data.error);
+                return;
+            }
+
+            const domestic = data.domestic;
+            const international = data.international;
+
+            // Correct the section IDs to match the divs in the HTML
+            populateSection('loc', domestic, 'domesticLocationSection');
+            populateSection('int', international, 'internationalLocationSection');
+        } catch (error) {
+            alert("Error fetching locations: " + error.message);
+        }
+    }
+
+    // Populate the select options for each location section
+    function populateSection(prefix, data, sectionId) {
+        const section = document.getElementById(sectionId);
+
+        if (!section) {
+            console.error(`Section with ID ${sectionId} not found`);
+            return;  // Exit if the section is not found
+        }
+
+        for (let i = 1; i <= 3; i++) {  // Place 1 to 3
+            for (let j = 1; j <= 3; j++) {  // Option 1 to 3
+                const selectId = `${prefix}${i}_${j}`;
+                const select = document.getElementById(selectId);
+
+                if (select) {  // Check if the select element exists
+                    // Clear existing options
+                    select.innerHTML = "";
+
+                    // Add default option
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = "";
+                    defaultOption.text = "Select option";
+                    select.appendChild(defaultOption);
+
+                    // Populate with new options from data
+                    const key = `Option ${j}`;
+                    if (data[key]) {
+                        data[key].forEach(opt => {
+                            if (opt && opt.trim()) {
+                                const option = document.createElement("option");
+                                option.value = opt;
+                                option.text = opt;
+                                select.appendChild(option);
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    // Fetch employee details when the employee ID changes
+    function fetchDetails() {
+        const empId = document.getElementById("emp_id").value;
+        fetch('/get_employee', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ emp_id: empId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) alert(data.error);
+            else {
+                document.getElementById("name").value = data.name;
+                document.getElementById("department").value = data.department;
+            }
+        });
+    }
+
+    // Submit the form with employee preferences
+    function submitForm() {
+        const data = {
+            emp_id: document.getElementById("emp_id").value,
+            name: document.getElementById("name").value,
+            department: document.getElementById("department").value
+        };
+
+        ['loc', 'int'].forEach(prefix => {
+            for (let i = 1; i <= 3; i++) {
+                for (let j = 1; j <= 3; j++) {
+                    data[`${prefix}${i}_${j}`] = document.getElementById(`${prefix}${i}_${j}`).value;
+                }
+            }
+        });
+
+        fetch('/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(res => alert(res.message));
+    }
+
+    // Call populateSelects to load location data when the page is loaded
+    window.onload = populateSelects;
+</script>
+
+</body>
+</html>
